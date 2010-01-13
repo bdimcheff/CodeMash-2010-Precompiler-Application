@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe User do
+describe "User role instance methods" do
   before(:each) do
     @user = Factory.create(:user)
   end
@@ -31,14 +31,35 @@ describe User do
     end
     
     it 'can assign multiple roles' do
-      @user.roles.should have(2).roles
+      @user.should have(2).roles
       @user.roles.should include('attendee')
       @user.roles.should include('speaker')
     end
     
     it 'determines if the user has the role' do
-      @user.has_role?('attendee').should be_true
-      @user.has_role?('speaker').should be_true
+      @user.should have_role('attendee')
+      @user.should have_role('speaker')
     end
+  end
+end
+
+describe "User role class methods" do
+  it 'returns all users for a particular role' do
+    attendee = Factory.create(:user, :roles => ['attendee'])
+    speaker = Factory.create(:user, :roles => ['speaker'])
+    
+    User.with_role('attendee').should include(attendee)
+  end
+  
+  it 'returns users when they have multiple roles' do
+    attendee = Factory.create(:user, :roles => ['attendee'])
+    speaker_attendee = Factory.create(:user, :roles => ['speaker', 'attendee'])
+    Factory.create(:user, :roles => ['organizer'])
+    
+    attendees = User.with_role('attendee')
+    
+    attendees.should have(2).attendees
+    attendees.should include(attendee)
+    attendees.should include(speaker_attendee)
   end
 end
